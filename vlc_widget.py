@@ -1,10 +1,11 @@
+__author__ = "Hector Yong Hyun Cho"
+__version__ = "0.0.1"
+
+
 import sys
 import user
 import vlc
 from PyQt4 import QtGui, QtCore
-
-
-
 
 class VLCPlayerWidget(QtGui.QWidget):
     def __init__(self):
@@ -89,8 +90,6 @@ class VLCPlayerWidget(QtGui.QWidget):
         # the media player has to be 'connected' to the QFrame
         # (otherwise a video would be displayed in it's own window)
         # this is platform specific!
-        # you have to give the id of the QFrame (or similar object) to
-        # vlc, different platforms have different functions for this
         if sys.platform == "linux2": # for Linux using the X Server
             self.mediaplayer.set_xwindow(self.videoframe.winId())
         elif sys.platform == "win32": # for Windows
@@ -150,13 +149,6 @@ class VLCPlayerWidget(QtGui.QWidget):
                 # "Pause", not the desired behavior of a media player
                 # this will fix it
                 self.Stop()
-
-
-
-
-
-
-
 
 
 if __name__ == "__main__":
