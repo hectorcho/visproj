@@ -6,6 +6,9 @@ from PyQt4 import QtCore, QtGui
 import pyqtgraph as pg
 import numpy as np
 
+from ui_menubar import Ui_Menubar
+from vlc_widget import VLCPlayerWidget
+
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
 except AttributeError:
@@ -29,6 +32,12 @@ class Ui_MainWindow(object):
         self.vlcWidget = QtGui.QWidget(self.centralWidget)
         self.vlcWidget.setGeometry(QtCore.QRect(20, 10, 1280, 720))
         self.vlcWidget.setObjectName(_fromUtf8("vlcWidget"))
+        self.l = QtGui.QVBoxLayout()
+        self.vlcWidget.setLayout(self.l)
+
+        self.vlcplayer = VLCPlayerWidget()
+        self.l.addWidget(self.vlcplayer)
+
 
 
 
