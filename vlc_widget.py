@@ -69,6 +69,10 @@ class VLCPlayerWidget(QtGui.QWidget):
 
         self.setLayout(self.vboxlayout)
 
+        self.timer = QtCore.QTimer(self)
+        self.timer.setInterval(200)
+        self.connect(self.timer, QtCore.SIGNAL("timeout()"), self.updateUI)
+
 
     def OpenFile(self, filename=None):
         """Open a media file in a MediaPlayer
@@ -140,7 +144,7 @@ class VLCPlayerWidget(QtGui.QWidget):
     def updateUI(self):
         """updates the user interface"""
         # setting the slider to the desired position
-        self.positionslider.setValue(self.mediaplayer.get_position() * 1000)
+        self.positionSlider.setValue(self.mediaplayer.get_position() * 1000)
 
         if not self.mediaplayer.is_playing():
             # no need to call this function if nothing is played

@@ -57,8 +57,10 @@ class Ui_MainWindow(object):
         self.eegScroll.setMaximum(1000)
 
         self.vlcslider = self.vlcplayer.positionSlider
+        self.vlctimer = self.vlcplayer.timer
 
         QtCore.QObject.connect(self.vlcslider, QtCore.SIGNAL("actionTriggered(int)"), self.SyncScroll)
+        QtCore.QObject.connect(self.vlctimer, QtCore.SIGNAL("timeout()"), self.updateScroll)
 
 
         #refer to drawCurve() method below
@@ -170,6 +172,8 @@ class Ui_MainWindow(object):
         sliderValue = self.vlcslider.value()
         self.eegScroll.setValue(sliderValue)
 
+    def updateScroll(self):
+        self.eegScroll.setValue(self.vlcslider.value())
 
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
