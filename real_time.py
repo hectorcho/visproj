@@ -1,11 +1,14 @@
 import sys
-from PyQt4 import QtCore, QtGui
+from PyQt4 import QtCore, QtGui, Qt
 import PyQt4
 import pyqtgraph as pg
 import numpy as np
 import pyqtgraph.examples
 import math
 # pyqtgraph.examples.run()
+
+from vlc_widget import VLCPlayerWidget
+from ui_menubar import Ui_Menubar
 
 
 try:
@@ -31,15 +34,25 @@ class Ui_MainWindow(object):
         self.centralWidget = QtGui.QWidget(MainWindow)
         self.centralWidget.setObjectName(_fromUtf8("centralWidget"))
         self.vlcWidget = QtGui.QWidget(self.centralWidget)
-        self.vlcWidget.setGeometry(QtCore.QRect(20, 10, 10, 10))
+        self.vlcWidget.setGeometry(QtCore.QRect(20, 10, 1280, 720))
         self.vlcWidget.setObjectName(_fromUtf8("vlcWidget"))
 
-        self.slider = QtGui.QSlider(QtCore.Qt.Horizontal, self.centralWidget)
-        self.slider.setGeometry(QtCore.QRect(20,500,500,60))
+        self.l = QtGui.QVBoxLayout()
+        self.vlcWidget.setLayout(self.l)
+
+        self.vlcplayer = VLCPlayerWidget()
+        self.l.addWidget(self.vlcplayer)
+
+        #self.slider = QtGui.QSlider(QtCore.Qt.Horizontal, self.centralWidget)
+        #self.slider.setGeometry(QtCore.QRect(20,500,500,60))
 
         self.graphicsView = pg.PlotWidget(self.centralWidget)
-        self.graphicsView.setGeometry(QtCore.QRect(20, 20, 500, 400))
+        self.graphicsView.setGeometry(QtCore.QRect(20, 750, 1280, 270))
         self.graphicsView.setObjectName(_fromUtf8("graphicsView"))
+
+        self.eegScroll = QtGui.QScrollBar(QtCore.Qt.Horizontal, MainWindow)
+        self.eegScroll.setGeometry(QtCore.QRect(20, 1100, 1280, 10))
+        self.eegScroll.setMaximum(750)
 
         #refer to drawCurve() method below
 
@@ -48,7 +61,16 @@ class Ui_MainWindow(object):
         self.menuBar = QtGui.QMenuBar(MainWindow)
         self.menuBar.setGeometry(QtCore.QRect(0, 0, 800, 22))
         self.menuBar.setObjectName(_fromUtf8("menuBar"))
-        MainWindow.setMenuBar(self.menuBar)
+
+        #self.eeg_menu = self.menuBar.addMenu('&File')
+
+
+        #self.load_file = QtGui.QAction("&Load File", self)
+        #self.load_file.triggered.connect(self.openEEG)
+
+
+
+
         self.mainToolBar = QtGui.QToolBar(MainWindow)
         self.mainToolBar.setObjectName(_fromUtf8("mainToolBar"))
         MainWindow.addToolBar(QtCore.Qt.TopToolBarArea, self.mainToolBar)
@@ -129,21 +151,26 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow", None))
 
-def loadFile(filename):
-    eeg = np.loadtxt(filename,delimiter=",")
-    # print(eeg.shape) should be 65 * 62520
-    return eeg[0:2,:];
+
+    def openEEG(self, filename = None):
+        if filename is None:
+            filename = QtGui.QFileDialog.getOpenFileName(self, "Open File", user.home)
+        if not filename:
+            return
+        self.eeg = np.loadtxt(filename,delimiter=",")
+
 
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
     MainWindow = QtGui.QMainWindow()
-    eeg = loadFile("AZZ1_v2_Carol_30sec.txt")
+    MainWindow.resize(1920, 1080)
+    #eeg = openEEG("AZZ1_v2_Carol_30sec.txt")
     ui = Ui_MainWindow()
     ui.setupUi(MainWindow)
-    ui.drawCurve(eeg)
-    ui.cal_content()
+    #ui.drawCurve(eeg)
+    # ui.cal_content()
     MainWindow.show()
-    t = QtCore.QTimer()
-    t.timeout.connect(ui.updateData)
-    t.start(100)
+    # t = QtCore.QTimer()
+    # t.timeout.connect(ui.updateData)
+    # t.start(100)
     sys.exit(app.exec_())
