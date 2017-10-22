@@ -50,9 +50,15 @@ class Ui_MainWindow(object):
         self.graphicsView.setGeometry(QtCore.QRect(20, 750, 1280, 270))
         self.graphicsView.setObjectName(_fromUtf8("graphicsView"))
 
+
         self.eegScroll = QtGui.QScrollBar(QtCore.Qt.Horizontal, MainWindow)
-        self.eegScroll.setGeometry(QtCore.QRect(20, 1100, 1280, 10))
-        self.eegScroll.setMaximum(750)
+        self.eegScroll.setGeometry(QtCore.QRect(20, 1050, 1280, 10))
+        self.eegScroll.setMaximum(1000)
+
+        self.vlcslider = self.vlcplayer.positionSlider
+
+        QtCore.QObject.connect(self.vlcslider, QtCore.SIGNAL("actionTriggered(int)"), self.SyncScroll)
+
 
         #refer to drawCurve() method below
 
@@ -158,6 +164,10 @@ class Ui_MainWindow(object):
         if not filename:
             return
         self.eeg = np.loadtxt(filename,delimiter=",")
+
+    def SyncScroll(self):
+        sliderValue = self.vlcslider.value()
+        self.eegScroll.setValue(sliderValue)
 
 
 if __name__ == "__main__":

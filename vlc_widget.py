@@ -150,6 +150,9 @@ class VLCPlayerWidget(QtGui.QWidget):
                 # this will fix it
                 self.Stop()
 
+    def getPosition(self):
+        return self.mediaplayer.get_position()
+
 
 if __name__ == "__main__":
     app = QtGui.QApplication(sys.argv)
