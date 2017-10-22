@@ -6,6 +6,7 @@ import numpy as np
 import pyqtgraph.examples
 import math
 # pyqtgraph.examples.run()
+# comment
 
 from vlc_widget import VLCPlayerWidget
 from ui_menubar import Ui_Menubar
