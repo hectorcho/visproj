@@ -47,6 +47,7 @@ class Ui_MainWindow(object):
 
         self.video_widget.positionSlider.rangeChanged.connect(self.syncEggRange)
         self.video_widget.positionSlider.valueChanged.connect(self.SyncScroll)
+        self.eegWidget.positionSlider.sliderMoved.connect(self.updateScroll)
 
         MainWindow.setCentralWidget(self.centralWidget)
 
@@ -62,9 +63,9 @@ class Ui_MainWindow(object):
     def SyncScroll(self,position):
         self.eegWidget.positionSlider.setValue(position)
 
-    # def updateScroll(self):
-    #     self.eegScroll.setValue(self.vlcslider.value())
-    #     self.update_eeg_graph()
+    def updateScroll(self,position):
+        self.video_widget.player.pause()
+        self.video_widget.positionSlider.setValue(position)
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)

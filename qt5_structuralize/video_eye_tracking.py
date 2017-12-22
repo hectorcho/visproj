@@ -5,10 +5,11 @@ from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 import PyQt5.QtMultimedia as QM
-from PyQt5.QtMultimediaWidgets import QVideoWidget
+import utility
 from PyQt5.QtMultimediaWidgets import QGraphicsVideoItem
 import numpy as np
 import math
+import random
 import pandas
 
 class eyeTrackingWidget(QtWidgets.QWidget):
@@ -17,10 +18,9 @@ class eyeTrackingWidget(QtWidgets.QWidget):
         #####################       eye tracking        #####################
         self.audience_eye_tracking_dic = {}
         self.eye_track_dic = {}
+        self.elements = {}
         self.eye_track_frame_rate = 5
         self.trial_lapse = 2000
-        self.lines = [];
-        self.dot = None;
         self.eye_tracking_width = 1024
         self.eye_tracking_height = 768
         self.view_width=854
@@ -77,6 +77,15 @@ class eyeTrackingWidget(QtWidgets.QWidget):
         self.hbuttonbox.addWidget(self.openbutton2)
         self.openbutton2.clicked.connect(self.open_eye)
 
+        self.comboLabel = QtWidgets.QLabel("Select objects:")
+        self.combobox = QtWidgets.QComboBox(self)
+        self.comboboxDelegate = utility.SubclassOfQStyledItemDelegate()
+        self.combobox.setItemDelegate(self.comboboxDelegate)
+        self.combobox.setSizeAdjustPolicy(0)
+        self.hbuttonbox.addWidget(self.comboLabel)
+        self.hbuttonbox.addWidget(self.combobox)
+
+
         self.hbuttonbox.addStretch(1)
         self.layout.addWidget(self.positionSlider)
         self.layout.addLayout(self.hbuttonbox)
@@ -105,10 +114,18 @@ class eyeTrackingWidget(QtWidgets.QWidget):
         self.playbutton.setText("Play")
 
     def open_eye(self):
-        filename,_ = QtWidgets.QFileDialog.getOpenFileName(self, "Open EYE", user.home)
-        if not filename:
+        filenames,_ = QtWidgets.QFileDialog.getOpenFileNames(self, "Open EYE", user.home)
+        print filenames, len(filenames)
+        if not filenames:
             return
-        self.create_eye_tracking_reference_dict(pandas.read_excel(str(filename)))
+        object_list=[]
+        self.audience_eye_tracking_dic = {}
+        self.eye_track_dic = {}
+        for filename in filenames:
+            object = os.path.split(filename)[-1].split('_')[0]
+            self.create_eye_tracking_reference_dict(pandas.read_excel(str(filename)),object)
+            object_list.append(object)
+        self.addSelectArea(object_list)
 
     def play_pause(self):
         self.videoItem.setSize(QtCore.QSizeF(self.view_width, self.view_height))
@@ -126,51 +143,85 @@ class eyeTrackingWidget(QtWidgets.QWidget):
     def updateUI(self, position):
         self.positionSlider.setValue(position)
 
-    def updateEyeTracking(self,position):
+    def updateEyeTracking(self, position):
         if len(self.eye_track_dic.keys()) == 0:# or self.player.state() != 2:
             return
         self.draw_eye_tracking()
-    # def resizeEvent(self, event):
-    #    if event.oldSize().isValid():
-    #        print(self.view.scene().sceneRect())
-    #        self.view.fitInView(self.view.scene().sceneRect(), Qt.KeepAspectRatio)
-    #    QWidget.resizeEvent(self, event)
 
-    #####################       eye tracking        #####################
+    def addSelectArea(self, objects):
+        self.player.pause()
+        for k in self.elements.keys():
+            self.removeElement(self.elements[k],k)
+        self.elements={}
+        self.model = QtGui.QStandardItemModel(len(objects) + 1, 1)  # 5 rows, 2 col
+        firstItem = QtGui.QStandardItem("---- Select area(s) ----")
+        firstItem.setBackground(QtGui.QBrush(QtGui.QColor(200, 200, 200)))
+        firstItem.setSelectable(False)
+        self.model.setItem(0, 0, firstItem)
+        num = 0
+        for obj in objects:
+            num += 1
+            item = QtGui.QStandardItem(obj)
+            item.setFlags(QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled)
+            itemColor = QtGui.QColor(random.randint(0, 255),random.randint(0, 255),random.randint(0, 255))
+            item.setBackground(itemColor)
+            if num <= 2:
+                item.setData(QtCore.Qt.Checked, QtCore.Qt.CheckStateRole)
+                self.elements[item.text()] = {'dot': None, 'lines': [], 'color':itemColor}
+            else:
+                item.setData(QtCore.Qt.Unchecked,QtCore.Qt.CheckStateRole)
+            self.model.setItem(num, 0, item)
+        self.model.itemChanged.connect(self.update_objects)
+        self.combobox.setModel(self.model)
 
-    def draw_dot_line(self, v):
+    def removeElement(self, element, name):
+        for line in element['lines']:
+            self.scene.removeItem(line)
+            del line
+        self.scene.removeItem(element['dot'])
+        del element['dot']
+        # del element['color']
+        self.elements.pop(name)
+
+    def update_objects(self, item):
+        if item.checkState() == 0:
+            self.removeElement(self.elements[item.text()], item.text())
+        else:
+            self.elements[item.text()]={'dot':None,'lines':[], 'color':item.background().color()}
+
+    def draw_dot_line(self, v, obj):
         pos = v['pos']
         rad = v['rad']
-        if self.dot is not None:
-            self.dot.setRect(QtCore.QRectF(0, 0, rad, rad))
-            self.dot.setPos(QtCore.QPoint(pos[0]-rad/2, pos[1]-rad/2))
+        if self.elements[obj]['dot'] is not None:
+            self.elements[obj]['dot'].setRect(QtCore.QRectF(0, 0, rad, rad))
         else:
-            self.dot = self.scene.addEllipse(QtCore.QRectF(0, 0, rad, rad), QtGui.QPen(QtCore.Qt.red), QtGui.QBrush(QtCore.Qt.red))
-            # self.dot.setParentItem(self.scene)
+            self.elements[obj]['dot'] = self.scene.addEllipse(QtCore.QRectF(0, 0, rad, rad),
+                             QtGui.QPen(QtCore.Qt.red), QtGui.QBrush(self.elements[obj]['color']))
+        self.elements[obj]['dot'].setPos(QtCore.QPoint(pos[0] - rad / 2, pos[1] - rad / 2))
         j = 0
         for i in range(len(v['lines'])):
             j = i
-            if i >= len(self.lines):
-                self.lines.append(self.scene.addLine(QtCore.QLineF(v['lines'][i][0][0], v['lines'][i][0][1],
+            if i >= len(self.elements[obj]['lines']):
+                self.elements[obj]['lines'].append(self.scene.addLine(QtCore.QLineF(v['lines'][i][0][0], v['lines'][i][0][1],
                                                             v['lines'][i][1][0], v['lines'][i][1][1]),
-                                                     QtGui.QPen(QtCore.Qt.red)))
-                # self.lines[-1].setParentItem(self.scene)
+                                                     QtGui.QPen(self.elements[obj]['color'])))
             else:
-                self.lines[i].setLine(QtCore.QLineF(v['lines'][i][0][0], v['lines'][i][0][1],
+                self.elements[obj]['lines'][i].setLine(QtCore.QLineF(v['lines'][i][0][0], v['lines'][i][0][1],
                                              v['lines'][i][1][0], v['lines'][i][1][1]))
-        if len(self.lines) > j:
-            del self.lines[j+1:-1]
+        if len(self.elements[obj]['lines']) > j:
+            for line in self.elements[obj]['lines'][j+1:-1]:
+                self.scene.removeItem(line)
+                del line
 
     def resolution_transfer(self, x, y, duration):
         return [x / self.eye_tracking_width * self.view_width,\
                y / self.eye_tracking_height * self.view_height, \
                3 + duration / 20.0]
 
-    def create_eye_tracking_reference_dict(self, excel):
-        self.audience_eye_tracking_dic['an1'] = {'pos': [], 'rad':0,'lines': []}
+    def create_eye_tracking_reference_dict(self, excel, object):
+        self.audience_eye_tracking_dic[object] = {'pos': [], 'rad':0,'lines': []}
         self.eye_track_window = 1000 / self.eye_track_frame_rate
-        self.eye_track_dic = {}
-        self.eye_track_dic['an1'] = []
+        self.eye_track_dic[object] = []
         last_one = int(excel['CURRENT_FIX_START'][521] / self.eye_track_window)
         head = 0
         for i in range(last_one):
@@ -180,21 +231,22 @@ class eyeTrackingWidget(QtWidgets.QWidget):
                 if excel['CURRENT_FIX_START'][head] > start_time:
                     break
                 if excel['CURRENT_FIX_START'][head] <= start_time and start_time <= excel['CURRENT_FIX_END'][head]:
-                    self.eye_track_dic['an1'].append(self.resolution_transfer(excel['CURRENT_FIX_X'][head], excel['CURRENT_FIX_Y'][head], excel['CURRENT_FIX_DURATION'][head]))
+                    self.eye_track_dic[object].append(self.resolution_transfer(excel['CURRENT_FIX_X'][head], excel['CURRENT_FIX_Y'][head], excel['CURRENT_FIX_DURATION'][head]))
                     updated_flag = True
                     break
                 head += 1
             if not updated_flag:
-                if len(self.eye_track_dic['an1']) > 0:
-                    self.eye_track_dic['an1'].append(self.eye_track_dic['an1'][-1])
+                if len(self.eye_track_dic[object]) > 0:
+                    self.eye_track_dic[object].append(self.eye_track_dic[object][-1])
                 else:
-                    self.eye_track_dic['an1'].append([])
+                    self.eye_track_dic[object].append([])
                     # print "no positions!"
-        print self.eye_track_dic
+        # print self.eye_track_dic
 
     def draw_eye_tracking(self, clean_flag=False):
         media_time = self.player.position()
-        for k, v in self.audience_eye_tracking_dic.iteritems():
+        for k in self.elements:
+            v = self.audience_eye_tracking_dic[k]
             eye_tracking_window_index = int(media_time / self.eye_track_window)
             if eye_tracking_window_index >= len(self.eye_track_dic[k]) \
                     or len(self.eye_track_dic[k][eye_tracking_window_index]) < 3:
@@ -208,7 +260,7 @@ class eyeTrackingWidget(QtWidgets.QWidget):
                             self.eye_track_dic[k][eye_tracking_window_index - line_num - 1]) == 3:
                         v['lines'].append([self.eye_track_dic[k][eye_tracking_window_index - line_num - 1],
                                            self.eye_track_dic[k][eye_tracking_window_index - line_num]])
-                self.draw_dot_line(v)
+                self.draw_dot_line(v, k)
 
                 #####################       eye tracking        #####################
 
