@@ -7,11 +7,11 @@ import video_eye_tracking
 import eeg_widget
 # pyqtgraph.examples.run()
 # comment
-import user
+
 
 
 try:
-    _fromUtf8 = unicode
+    _fromUtf8 = str
 except AttributeError:
     def _fromUtf8(s):
         return s
@@ -31,20 +31,20 @@ class Ui_MainWindow(object):
 
     def setupUi(self, MainWindow):
         MainWindow.setObjectName(_fromUtf8("MainWindow"))
-        MainWindow.setGeometry(0, 0, 1400, 900)
+        MainWindow.setGeometry(0, 0, 1920, 1080)
         self.centralWidget = QtWidgets.QWidget(MainWindow)
         self.centralWidget.setObjectName(_fromUtf8("centralWidget"))
         self.video_widget = video_eye_tracking.eyeTrackingWidget(self.centralWidget)
-        self.video_widget.setGeometry(QtCore.QRect(10, 10, 900, 500))
+        self.video_widget.setGeometry(QtCore.QRect(5, 5, 1192, 750))
         self.video_widget.setObjectName(_fromUtf8("eyeTrackingWidget"))
 
         #self.slider = QtGui.QSlider(QtCore.Qt.Horizontal, self.centralWidget)
         #self.slider.setGeometry(QtCore.QRect(20,500,500,60))
 
         self.eegWidget = eeg_widget.eegWidget(self.centralWidget)
-        self.eegWidget.setGeometry(QtCore.QRect(10, 500, 900, 400))
+        self.eegWidget.setGeometry(QtCore.QRect(5, 750, 1192, 300))
         self.eegWidget.setObjectName(_fromUtf8("graphicsView"))
- 
+
         self.video_widget.positionSlider.rangeChanged.connect(self.syncEggRange)
         self.video_widget.positionSlider.valueChanged.connect(self.SyncScroll)
         self.eegWidget.positionSlider.sliderMoved.connect(self.updateScroll)
@@ -70,7 +70,7 @@ class Ui_MainWindow(object):
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
-    MainWindow.resize(1400, 900)
+    MainWindow.resize(1920, 1080)
     ui = Ui_MainWindow()
     ui.setupUi(MainWindow)
     MainWindow.show()

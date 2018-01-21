@@ -1,6 +1,6 @@
 import sys
 import os
-import user
+from pathlib import Path
 from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
@@ -16,8 +16,8 @@ class eegWidget(QtWidgets.QWidget):
     def __init__(self, *args, **kwargs):
         QtWidgets.QWidget.__init__(self, *args, **kwargs)
         self.eeg_data = None
-        self.graph_width = 860
-        self.graph_height = 400
+        self.graph_width = 1240
+        self.graph_height = 700
         self.time = 0
         self.eeg = None
         self.views = []
@@ -25,7 +25,7 @@ class eegWidget(QtWidgets.QWidget):
         self.view2ObjectIndex = []
         self.layout = QtWidgets.QVBoxLayout(self)
         self.createUI()
-        
+
 
 
     def createUI(self):
@@ -185,7 +185,8 @@ class eegWidget(QtWidgets.QWidget):
         self.combobox.setModel(self.model)
 
     def open_file(self, filename=None):
-        filename, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Open EYE", user.home)
+        home = str(Path.home())
+        filename, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Open EYE", home)
         if not filename:
             return
         self.eeg_data = np.loadtxt(str(filename), delimiter=",")[0:65, :]

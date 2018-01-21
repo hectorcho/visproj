@@ -1,6 +1,6 @@
 import sys
 import os
-import user
+from pathlib import Path
 from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
@@ -21,10 +21,10 @@ class eyeTrackingWidget(QtWidgets.QWidget):
         self.elements = {}
         self.eye_track_frame_rate = 5
         self.trial_lapse = 2000
-        self.eye_tracking_width = 1024
-        self.eye_tracking_height = 768
-        self.view_width=854
-        self.view_height=480
+        self.eye_tracking_width = 1024 ##1024
+        self.eye_tracking_height = 768 ##768
+        self.view_width= 1152 ##854
+        self.view_height= 648 ##480
         #####################       eye tracking        #####################
 
         self.layout = QtWidgets.QVBoxLayout(self)
@@ -38,6 +38,7 @@ class eyeTrackingWidget(QtWidgets.QWidget):
         # self.view = QGraphicsView(self.scene, self)
 
         self.videoItem = QGraphicsVideoItem()
+        #self.videoItem.setAspectRatioMode(QtCore.Qt.KeepAspectRatio)
         self.scene = QtWidgets.QGraphicsScene(self)
         self.view = QtWidgets.QGraphicsView(self.scene)
         self.player.setVideoOutput(self.videoItem)
@@ -46,8 +47,10 @@ class eyeTrackingWidget(QtWidgets.QWidget):
         self.view.setGeometry(0, 0, self.view_width, self.view_height)
         self.scene.setSceneRect(0, 0, self.view_width, self.view_height)
         self.videoItem.setSize(QtCore.QSizeF(self.view_width, self.view_height))
+        #self.videoItem.setAspectRatioMode(QtCore.Qt.KeepAspectRatio)
         self.videoItem.setPos(0, 0)
         self.layout.addWidget(self.view)
+
         self.createUI()
         self.view.show()
 
@@ -105,17 +108,20 @@ class eyeTrackingWidget(QtWidgets.QWidget):
             self.playbutton.setText("Play")
 
     def open_file(self):
-        filename, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Open File", user.home)
+        home = str(Path.home())
+        filename, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Open File", home)
         if not filename:
             return
         url = QtCore.QUrl.fromLocalFile(filename)
         content = QM.QMediaContent(url)
+        #self.videoItem.setAspectRatioMode(1)
         self.player.setMedia(content)
         self.playbutton.setText("Play")
 
     def open_eye(self):
-        filenames,_ = QtWidgets.QFileDialog.getOpenFileNames(self, "Open EYE", user.home)
-        print filenames, len(filenames)
+        home = str(Path.home())
+        filenames,_ = QtWidgets.QFileDialog.getOpenFileNames(self, "Open EYE", home)
+        print("%s, %s" % (filenames, len(filenames)))
         if not filenames:
             return
         object_list=[]
@@ -128,7 +134,7 @@ class eyeTrackingWidget(QtWidgets.QWidget):
         self.addSelectArea(object_list)
 
     def play_pause(self):
-        self.videoItem.setSize(QtCore.QSizeF(self.view_width, self.view_height))
+        #self.videoItem.setSize(QtCore.QSizeF(self.view_width, self.view_height))
         if self.player.state() == QM.QMediaPlayer.PlayingState:
             self.player.pause()
         else:
