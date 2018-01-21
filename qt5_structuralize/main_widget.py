@@ -31,7 +31,7 @@ class Ui_MainWindow(object):
 
     def setupUi(self, MainWindow):
         MainWindow.setObjectName(_fromUtf8("MainWindow"))
-        MainWindow.setGeometry(0, 0, 1920, 1080)
+        MainWindow.setGeometry(0, 0, 1920, 1100)
         self.centralWidget = QtWidgets.QWidget(MainWindow)
         self.centralWidget.setObjectName(_fromUtf8("centralWidget"))
         self.video_widget = video_eye_tracking.eyeTrackingWidget(self.centralWidget)
@@ -70,7 +70,7 @@ class Ui_MainWindow(object):
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
-    MainWindow.resize(1920, 1080)
+    MainWindow.resize(1920, 1100)
     ui = Ui_MainWindow()
     ui.setupUi(MainWindow)
     MainWindow.show()
