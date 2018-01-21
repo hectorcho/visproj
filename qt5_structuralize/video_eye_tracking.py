@@ -21,10 +21,10 @@ class eyeTrackingWidget(QtWidgets.QWidget):
         self.elements = {}
         self.eye_track_frame_rate = 5
         self.trial_lapse = 2000
-        self.eye_tracking_width = 1024 ##1024
-        self.eye_tracking_height = 768 ##768
-        self.view_width= 1152 ##854
-        self.view_height= 648 ##480
+        self.eye_tracking_width = 1024 ##eye tracking hardware resolution
+        self.eye_tracking_height = 768 ##eye tracking hardware resolution
+        self.view_width= 1152 ##QGraphicsView resolution
+        self.view_height= 648 ##QGraphicsView resolution
         #####################       eye tracking        #####################
 
         self.layout = QtWidgets.QVBoxLayout(self)
