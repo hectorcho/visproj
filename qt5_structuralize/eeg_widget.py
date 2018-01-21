@@ -16,8 +16,8 @@ class eegWidget(QtWidgets.QWidget):
     def __init__(self, *args, **kwargs):
         QtWidgets.QWidget.__init__(self, *args, **kwargs)
         self.eeg_data = None
-        self.graph_width = 1240
-        self.graph_height = 700
+        self.graph_width = 1150
+        self.graph_height = 300
         self.time = 0
         self.eeg = None
         self.views = []
