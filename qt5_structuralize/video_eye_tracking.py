@@ -19,12 +19,12 @@ class eyeTrackingWidget(QtWidgets.QWidget):
         self.audience_eye_tracking_dic = {}
         self.eye_track_dic = {}
         self.elements = {}
-        self.eye_track_frame_rate = 5
+        self.eye_track_frame_rate = 10
         self.trial_lapse = 2000
         self.eye_tracking_width = 1024 ##eye tracking hardware resolution
         self.eye_tracking_height = 768 ##eye tracking hardware resolution
         self.view_width= 1152 ##QGraphicsView resolution
-        self.view_height= 648 ##QGraphicsView resolution
+        self.view_height= 648 ##QGraphcsView
         #####################       eye tracking        #####################
 
         self.layout = QtWidgets.QVBoxLayout(self)
@@ -64,7 +64,8 @@ class eyeTrackingWidget(QtWidgets.QWidget):
         self.positionSlider = QtWidgets.QSlider(QtCore.Qt.Horizontal, self)
         self.positionSlider.setStyleSheet("QSlider::groove:horizontal {background-color:grey;}"
                                 "QSlider::handle:horizontal {background-color:black; height:8px; width: 8px;}")
-        self.positionSlider.valueChanged.connect(self.setPosition)
+        self.positionSlider.sliderMoved.connect(self.setPosition)
+        #self.positionSlider.valueChanged.connect(self.setPosition)
 
         # play button
         self.hbuttonbox = QtWidgets.QHBoxLayout()
@@ -141,6 +142,7 @@ class eyeTrackingWidget(QtWidgets.QWidget):
             self.player.play()
 
     def setPosition(self, position):
+        self.positionSlider.setValue(position)
         self.player.setPosition(position)
 
     def setRange(self, duration):

@@ -66,6 +66,7 @@ class Ui_MainWindow(object):
     def updateScroll(self,position):
         self.video_widget.player.pause()
         self.video_widget.positionSlider.setValue(position)
+        self.video_widget.player.setPosition(position)
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
