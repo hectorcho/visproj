@@ -5,15 +5,12 @@ from PyQt5 import QtCore
 from PyQt5 import QtGui
 from PyQt5 import QtWidgets
 import PyQt5.QtMultimedia as QM
-import PyQt5.QtQuick
 import utility
 from PyQt5.QtMultimediaWidgets import QGraphicsVideoItem
 import numpy as np
 import math
 import random
 import pandas
-#import timeline
-
 
 class eyeTrackingWidget(QtWidgets.QWidget):
     def __init__(self, *args, **kwargs):
@@ -32,8 +29,7 @@ class eyeTrackingWidget(QtWidgets.QWidget):
 
         self.layout = QtWidgets.QVBoxLayout(self)
         self.player = QM.QMediaPlayer()
-        #self.tl = timeline.timeline(self)
-        self.loaded = 0
+
         # self.qv = QVideoWidget()
         # self.scene = QGraphicsScene()
         # self.scene.setSceneRect(0, 0, self.view_width, self.view_height);
@@ -43,11 +39,9 @@ class eyeTrackingWidget(QtWidgets.QWidget):
 
         self.videoItem = QGraphicsVideoItem()
         #self.videoItem.setAspectRatioMode(QtCore.Qt.KeepAspectRatio)
-        self.player.setVideoOutput(self.videoItem)
         self.scene = QtWidgets.QGraphicsScene(self)
-
         self.view = QtWidgets.QGraphicsView(self.scene)
-        self.view.setViewport(PyQt5.QtOpenGL.QGLWidget())
+        self.player.setVideoOutput(self.videoItem)
         self.scene.addItem(self.videoItem)
 
         self.view.setGeometry(0, 0, self.view_width, self.view_height)
@@ -57,17 +51,12 @@ class eyeTrackingWidget(QtWidgets.QWidget):
         self.videoItem.setPos(0, 0)
         self.layout.addWidget(self.view)
 
-        #self.tl = timeline.timeline(self)
-        #self.layout.addChildWidget(self.tl)
-
-
         self.createUI()
         self.view.show()
 
 
         # player.setInterval(self.eye_track_frame_rate)
         # timer.timeout.connect(self.draw_eye_tracking)
-
 
     def createUI(self):
 
@@ -92,13 +81,6 @@ class eyeTrackingWidget(QtWidgets.QWidget):
         self.hbuttonbox.addWidget(self.openbutton2)
         self.openbutton2.clicked.connect(self.open_eye)
 
-        self.openbutton3 = QtWidgets.QPushButton("Open TL")
-        self.hbuttonbox.addWidget(self.openbutton3)
-        self.openbutton3.clicked.connect(self.open_timeline)
-
-        self.openbutton4 = QtWidgets.QPushButton("Open EEG")
-        self.hbuttonbox.addWidget(self.openbutton4)
-
         self.comboLabel = QtWidgets.QLabel("Select objects:")
         self.combobox = QtWidgets.QComboBox(self)
         self.comboboxDelegate = utility.SubclassOfQStyledItemDelegate()
@@ -106,7 +88,6 @@ class eyeTrackingWidget(QtWidgets.QWidget):
         self.combobox.setSizeAdjustPolicy(0)
         self.hbuttonbox.addWidget(self.comboLabel)
         self.hbuttonbox.addWidget(self.combobox)
-
 
 
         self.hbuttonbox.addStretch(1)
@@ -120,7 +101,6 @@ class eyeTrackingWidget(QtWidgets.QWidget):
         self.player.stateChanged.connect(self.setButtonCaption)
 
         self.setLayout(self.layout)
-
 
     def setButtonCaption(self,state):
         if self.player.state() == QM.QMediaPlayer.PlayingState:
@@ -161,12 +141,11 @@ class eyeTrackingWidget(QtWidgets.QWidget):
         else:
             self.player.play()
 
-
     def setPosition(self, position):
         self.positionSlider.setValue(position)
         self.player.setPosition(position)
 
-    def setRange(self):
+    def setRange(self, duration):
         self.positionSlider.setRange(0, self.player.duration())
 
     def updateUI(self, position):
@@ -293,72 +272,9 @@ class eyeTrackingWidget(QtWidgets.QWidget):
 
                 #####################       eye tracking        #####################
 
-    def open_timeline(self):
-        home = str(Path.home())
-        filename,_ = QtWidgets.QFileDialog.getOpenFileName(self, "Open TL", home)
-        if not filename:
-            return
-        self.tldata = pandas.read_excel(str(filename))
-        self.tldata = self.tldata.as_matrix()
-        self.makeArr(self.tldata)
-        self.loaded = 1
-        self.update()
-        self.randArr = np.random.randint(0, 256, size=(3,15))
-
-
-
-
-
-    def makeArr(self, tldata):
-        startX = 12.0
-        pixLength = 1168.0
-        self.rows, self.cols = self.tldata.shape
-        dim = (self.rows, 6)
-        self.tldata = np.concatenate((self.tldata, np.zeros((dim))), axis=1)
-
-        #start_millisec
-        self.tldata[:,2] = self.tldata[:,0] * 1000.0
-
-        #end_millisec
-        self.tldata[:,3] = self.tldata[:,1] * 1000.0
-
-        #diff_millisec
-        self.tldata[:,4] = self.tldata[:,3] - self.tldata[:,2]
-
-        #X1 position
-        self.tldata[:,5] = startX + (self.tldata[:,2]/self.player.duration()) * pixLength
-
-        #X2 position
-        self.tldata[:,6] = self.tldata[:,5] + (self.tldata[:,4]/self.player.duration()) * pixLength
-
-        #width in pixels
-        self.tldata[:,7] = self.tldata[:,6] - self.tldata[:,5]
-
-        print(self.tldata[:,6])
-        print(self.tldata[:,7])
-
-    def paintEvent(self, e):
-        if self.loaded == 1:
-            qp = QtGui.QPainter()
-            qp.begin(self)
-            self.colorize(qp)
-            qp.end()
-        else:
-            print(e.type())
-
-
-    def colorize(self, qp):
-        Y = 700
-        #print("tl loaded:", self.tl_loaded)
-        for i in range(self.rows):
-            k = i % 15
-            qp.fillRect(QtCore.QRectF(self.tldata[i,6], Y, self.tldata[i,7], 5), QtGui.QColor(self.randArr[0,k], self.randArr[1,k], self.randArr[2,k]))
-
-
 if __name__ == '__main__':
 
-    # app = QtWidgets.QApplication(sys.argv)
-    # w = eyeTrackingWidget()
-    # w.show()
-    # sys.exit(app.exec_())
-    print("error4")
+    app = QtWidgets.QApplication(sys.argv)
+    w = eyeTrackingWidget()
+    w.show()
+    sys.exit(app.exec_())

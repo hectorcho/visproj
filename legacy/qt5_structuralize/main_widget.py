@@ -5,8 +5,6 @@ import numpy as np
 import math
 import video_eye_tracking
 import eeg_widget
-# import timeline
-
 # pyqtgraph.examples.run()
 # comment
 
@@ -40,20 +38,12 @@ class Ui_MainWindow(object):
         self.video_widget.setGeometry(QtCore.QRect(5, 5, 1192, 750))
         self.video_widget.setObjectName(_fromUtf8("eyeTrackingWidget"))
 
-
-
-        # self.tl = timeline.timeline(self.centralWidget)
-
-
-
         #self.slider = QtGui.QSlider(QtCore.Qt.Horizontal, self.centralWidget)
         #self.slider.setGeometry(QtCore.QRect(20,500,500,60))
 
         self.eegWidget = eeg_widget.eegWidget(self.centralWidget)
         self.eegWidget.setGeometry(QtCore.QRect(5, 750, 1192, 300))
         self.eegWidget.setObjectName(_fromUtf8("graphicsView"))
-
-        self.video_widget.openbutton4.clicked.connect(self.eegWidget.open_file)
 
         self.video_widget.positionSlider.rangeChanged.connect(self.syncEggRange)
         self.video_widget.positionSlider.valueChanged.connect(self.SyncScroll)
@@ -63,8 +53,6 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
-
-
 
     def syncEggRange(self):
         self.eegWidget.positionSlider.setRange(0, self.video_widget.positionSlider.maximum())

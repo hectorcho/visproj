@@ -47,7 +47,7 @@ class eyeTrackingWidget(QtWidgets.QWidget):
         self.scene = QtWidgets.QGraphicsScene(self)
 
         self.view = QtWidgets.QGraphicsView(self.scene)
-        self.view.setViewport(PyQt5.QtOpenGL.QGLWidget())
+        #self.view.setViewport(PyQt5.QtOpenGL.QGLWidget())
         self.scene.addItem(self.videoItem)
 
         self.view.setGeometry(0, 0, self.view_width, self.view_height)
