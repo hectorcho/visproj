@@ -34,15 +34,9 @@ class eyeTrackingWidget(QtWidgets.QWidget):
         self.player = QM.QMediaPlayer()
         #self.tl = timeline.timeline(self)
         self.loaded = 0
-        # self.qv = QVideoWidget()
-        # self.scene = QGraphicsScene()
-        # self.scene.setSceneRect(0, 0, self.view_width, self.view_height);
-        # self.player.setVideoOutput(self.qv)
-        # self.proxy = self.scene.addWidget(self.qv)
-        # self.view = QGraphicsView(self.scene, self)
+
 
         self.videoItem = QGraphicsVideoItem()
-        #self.videoItem.setAspectRatioMode(QtCore.Qt.KeepAspectRatio)
         self.player.setVideoOutput(self.videoItem)
         self.scene = QtWidgets.QGraphicsScene(self)
 
@@ -53,7 +47,7 @@ class eyeTrackingWidget(QtWidgets.QWidget):
         self.view.setGeometry(0, 0, self.view_width, self.view_height)
         self.scene.setSceneRect(0, 0, self.view_width, self.view_height)
         self.videoItem.setSize(QtCore.QSizeF(self.view_width, self.view_height))
-        #self.videoItem.setAspectRatioMode(QtCore.Qt.KeepAspectRatio)
+        self.videoItem.setAspectRatioMode(QtCore.Qt.KeepAspectRatio)
         self.videoItem.setPos(0, 0)
         self.layout.addWidget(self.view)
 
@@ -334,8 +328,8 @@ class eyeTrackingWidget(QtWidgets.QWidget):
         #width in pixels
         self.tldata[:,7] = self.tldata[:,6] - self.tldata[:,5]
 
-        print(self.tldata[:,6])
-        print(self.tldata[:,7])
+        #print(self.tldata[:,6])
+        #print(self.tldata[:,7])
 
     def paintEvent(self, e):
         if self.loaded == 1:
@@ -343,8 +337,7 @@ class eyeTrackingWidget(QtWidgets.QWidget):
             qp.begin(self)
             self.colorize(qp)
             qp.end()
-        else:
-            print(e.type())
+
 
 
     def colorize(self, qp):
