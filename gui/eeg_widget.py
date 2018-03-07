@@ -26,8 +26,6 @@ class eegWidget(QtWidgets.QWidget):
         self.layout = QtWidgets.QVBoxLayout(self)
         self.createUI()
 
-
-
     def createUI(self):
 
         # video position slider
@@ -39,7 +37,6 @@ class eegWidget(QtWidgets.QWidget):
         self.scrollarea = QtWidgets.QScrollArea()
         self.scrollarea.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
         self.scrollarea.setWidgetResizable(True)
-        # self.scrollarea.setGeometry(10, 0, self.graph_width, self.graph_height * 3)
         self.scrollarea.setWidget(self.graph_widget)
 
         self.positionSlider = QtWidgets.QSlider(QtCore.Qt.Horizontal, self)
@@ -113,8 +110,8 @@ class eegWidget(QtWidgets.QWidget):
         min = np.min(self.eeg_data[i + 1, :])
         y, x = self.cal_content(start_time=start_time, end_time=end_time, row=i+1)
         self.views[-1].setYRange(min, max)
-        self.views[-1].setLabel('left', 'EEG Value for ', units='V')
-        self.views[-1].setLabel('bottom', 'EEG Channel{}, Time'.format(i + 1), units='ms')
+        self.views[-1].setLabel('left', 'TS Value for ', units='V')
+        self.views[-1].setLabel('bottom', 'TS Channel{}, Time'.format(i + 1), units='ms')
         self.view_plots.append(self.views[-1].plot(x, y, pen=(0,1)))
 
     def cal_content(self, start_time=-2000, end_time=2000, row=1):
@@ -165,7 +162,7 @@ class eegWidget(QtWidgets.QWidget):
     def addSelectArea(self, objects_num):
         self.model = QtGui.QStandardItemModel(objects_num + 1, 1)  # 5 rows, 2 col
 
-        firstItem = QtGui.QStandardItem("---- Select area(s) ----")
+        firstItem = QtGui.QStandardItem("---- Select Channel(s) ----")
         firstItem.setBackground(QtGui.QBrush(QtGui.QColor(200, 200, 200)))
         firstItem.setSelectable(False)
         self.model.setItem(0, 0, firstItem)
@@ -194,6 +191,7 @@ class eegWidget(QtWidgets.QWidget):
         # self.changeView(np.ones(3).tolist())
         self.addSelectArea(objects_num)
         self.positionSlider.setRange(0, self.eeg_data[0,-1])
+        
 
 
 if __name__ == '__main__':
