@@ -5,7 +5,7 @@ import numpy as np
 import math
 import video_eye_tracking
 import eeg_widget
-# import timeline
+
 
 # pyqtgraph.examples.run()
 # comment
